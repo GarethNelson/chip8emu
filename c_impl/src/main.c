@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include <chip8_cpu.h>
+#include <chip8_input.h>
 
 #include <SDL.h>
 
@@ -20,5 +21,11 @@ int main(int argc, char** argv) {
     if(window==NULL) {
        fprintf(stderr,"Could not create window: %s\n", SDL_GetError());
     }
+
+    chip8_cpu_t* CPU = chip8_new_cpu();
+    chip8_load_rom(CPU, argv[1]);
+//    for(;;) {
+        chip8_dump_status(CPU);
+//    }
 
 }
