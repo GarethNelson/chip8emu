@@ -20,3 +20,4 @@ typedef struct chip8_cpu_t {
 chip8_cpu_t* chip8_new_cpu();
 void chip8_load_rom(chip8_cpu_t* cpu, char* filename);
 void chip8_dump_status(chip8_cpu_t* cpu);
+const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset);

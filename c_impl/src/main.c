@@ -24,8 +24,8 @@ int main(int argc, char** argv) {
 
     chip8_cpu_t* CPU = chip8_new_cpu();
     chip8_load_rom(CPU, argv[1]);
-//    for(;;) {
-        chip8_dump_status(CPU);
-//    }
+    for(;CPU->registers.PC < 4096; CPU->registers.PC++) {
+        printf("%s\n", chip8_disasm(CPU,CPU->registers.PC));
+    }
 
 }

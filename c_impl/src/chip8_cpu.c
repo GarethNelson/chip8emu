@@ -33,6 +33,47 @@ void chip8_load_rom(chip8_cpu_t* cpu, char* filename) {
      fclose(fd);
 }
 
+const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
+     static char retval[32];
+     snprintf(retval,32,"%s","UNKNOWN");
+     uint8_t* code = &(cpu->ram[offset]);
+     uint8_t upper_nibble = UPPER_NIBBLE_U8(code[0]);
+     switch(upper_nibble) {
+	case 0x00: {
+	     switch(code[1]) {
+		 case 0xE0: {
+		       snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "CLS");
+		       break;
+	         }
+	         case 0xEE: {
+ 		       snprintf(retval,32,"%04x %02x %02x %-10s",offset, code[0], code[1], "RTS");
+		       break;
+
+	         }
+                 default: {
+		   snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
+		   break;
+	 	 }
+	     }
+	     break;
+	}
+        case 0x06: {
+             snprintf(retval,32,"%04x %02x %02x %-10s V%01x,#$%02x", offset, code[0], code[1], "MOV IMM", code[0] & 0x0f, code[1]);
+	     break;
+	}
+	case 0x0a: {
+             snprintf(retval,32,"%04x %02x %02x %-10s I,#$%01x%02x", offset, code[0], code[1], "MOV IMM", code[0] & 0x0f, code[1]);
+	     break;
+	}
+	default: {
+             snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
+	}
+     }
+
+
+     return retval;
+}
+
 void chip8_dump_status(chip8_cpu_t* cpu) {
      printf("V:  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x \n", 
             cpu->registers.V[0],
@@ -59,4 +100,5 @@ void chip8_dump_status(chip8_cpu_t* cpu) {
 	    cpu->registers.DT,
 	    cpu->registers.ST);
      printf("OP: 0x%02x%02x\n", cpu->ram[cpu->registers.PC],cpu->ram[cpu->registers.PC+1] );
+     printf("Disasm: %s\n", chip8_disasm(cpu, cpu->registers.PC));
 }
