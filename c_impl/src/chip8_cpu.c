@@ -70,6 +70,24 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
 	     snprintf(retval,32,"%04x %02x %02x %-10s %02x%02x", offset, code[0], code[1], "CALL",lower_nibble,code[1]);
 	     break;
 	}
+	case 0x03: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V%01x %02x", offset, code[0], code[1], "SKIP.EQ",lower_nibble,code[1]);
+	     break;
+	}
+	case 0x04: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V%01x %02x", offset, code[0], code[1], "SKIP.NE",lower_nibble,code[1]);
+	     break;
+	}
+
+   	case 0x05: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V%01x V%01x", offset, code[0], code[1], "SKIP.EQ",lower_nibble,UPPER_NIBBLE_U8(code[1]));
+	     break;
+	}
+	case 0x09: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V%01x V%01x", offset, code[0], code[1], "SKIP.NE",lower_nibble,UPPER_NIBBLE_U8(code[1]));
+	     break;
+	}
+
 	case 0x0B: {
 	     snprintf(retval,32,"%04x %02x %02x %-10s V0(%02x%02x)", offset, code[0], code[1], "JMP",lower_nibble,code[1]);
 	     break;
@@ -77,6 +95,31 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
 
 	case 0x06: {
              snprintf(retval,32,"%04x %02x %02x %-10s V%01x,#$%02x", offset, code[0], code[1], "MOV IMM", code[0] & 0x0f, code[1]);
+	     break;
+	}
+	case 0x08: {
+	     switch(LOWER_NIBBLE_U8(code[1])) {
+		case 0x00: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "MOV", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x01: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "OR", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x02: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "AND", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x03: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "XOR", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x04: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "ADD.", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}			   
+	     }
 	     break;
 	}
 	case 0x0a: {
