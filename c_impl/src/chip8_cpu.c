@@ -42,7 +42,11 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
      switch(upper_nibble) {
 	case 0x00: {
 	     switch(code[1]) {
-		 case 0xE0: {
+		 case 0x00: {
+		       snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "NOP");
+		       break;
+		 }
+                 case 0xE0: {
 		       snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "CLS");
 		       break;
 	         }
