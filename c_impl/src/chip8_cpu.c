@@ -38,6 +38,7 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
      snprintf(retval,32,"%s","UNKNOWN");
      uint8_t* code = &(cpu->ram[offset]);
      uint8_t upper_nibble = UPPER_NIBBLE_U8(code[0]);
+     uint8_t lower_nibble = LOWER_NIBBLE_U8(code[0]);
      switch(upper_nibble) {
 	case 0x00: {
 	     switch(code[1]) {
@@ -57,7 +58,20 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
 	     }
 	     break;
 	}
-        case 0x06: {
+	case 0x01: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s %02x%02x", offset, code[0], code[1], "JMP",lower_nibble,code[1]);
+	     break;
+	}
+	case 0x02: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s %02x%02x", offset, code[0], code[1], "CALL",lower_nibble,code[1]);
+	     break;
+	}
+	case 0x0B: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V0(%02x%02x)", offset, code[0], code[1], "JMP",lower_nibble,code[1]);
+	     break;
+  	}
+
+	case 0x06: {
              snprintf(retval,32,"%04x %02x %02x %-10s V%01x,#$%02x", offset, code[0], code[1], "MOV IMM", code[0] & 0x0f, code[1]);
 	     break;
 	}
