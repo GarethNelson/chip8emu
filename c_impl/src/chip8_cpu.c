@@ -17,7 +17,7 @@ chip8_cpu_t* chip8_new_cpu() {
 	retval->registers.PC = 0x200; // where programs start by default
 	retval->registers.DT = 0;
 	retval->registers.ST = 0;
-	retval->registers.SP = 0;
+	retval->registers.SP = 0xEA0;
 
 	memcpy(retval->ram, chip8_rom_font, 80);
 	return retval;
@@ -118,14 +118,103 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
 		case 0x04: {
 		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "ADD.", lower_nibble, UPPER_NIBBLE_U8(code[1]));
 		     break;
-		}			   
+		}
+		case 0x05: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "SUB.", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x06: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x", offset, code[0], code[1], "SHR.", lower_nibble);
+		     break;
+		}
+		case 0x07: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x", offset, code[0], code[1], "SUBB.", lower_nibble, UPPER_NIBBLE_U8(code[1]));
+		     break;
+		}
+		case 0x0E: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x", offset, code[0], code[1], "SHL.", lower_nibble);
+		     break;
+		}
+	        default: {
+		   snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
+		   break;
+	 	}
 	     }
 	     break;
 	}
-	case 0x0a: {
+	case 0x0A: {
              snprintf(retval,32,"%04x %02x %02x %-10s I,#$%01x%02x", offset, code[0], code[1], "MOV IMM", code[0] & 0x0f, code[1]);
 	     break;
 	}
+	case 0x0D: {
+	     snprintf(retval,32,"%04x %02x %02x %-10s V%01x,V%01x #$%01x", offset, code[0], code[1], "SPRITE", lower_nibble, UPPER_NIBBLE_U8(code[1]),LOWER_NIBBLE_U8(code[1]));	     
+	     break;
+	}
+	case 0xE: {
+	     switch(code[1]) {
+		case 0x9E:{
+		     snprintf(retval,32,"%04x %02x %02x %-10s",offset, code[0], code[1], "SKIP.KEY");
+	             break;
+	        }
+
+		case 0xA1:{
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x",offset, code[0], code[1], "SKIP.NOKEY",lower_nibble);
+	             break;
+	        }
+                default: {
+		   snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
+		   break;
+	 	}
+	     }
+	     break;
+	}
+	case 0xF:{
+	     switch(code[1]) {
+		case 0x07: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x DELAY", offset, code[0], code[1], "MOV", lower_nibble);
+	             break;
+		}
+		case 0x0A: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s V%01x",offset, code[0], code[1], "WAITKEY",lower_nibble);
+	             break;
+	        }
+		case 0x15: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s DELAY V%01x", offset, code[0], code[1], "MOV", lower_nibble);
+	             break;
+ 		}
+		case 0x18: {
+		     snprintf(retval,32,"%04x %02x %02x %-10s SOUND V%01x", offset, code[0], code[1], "MOV", lower_nibble);
+	             break;
+ 		}
+		case 0x1E: {
+                     snprintf(retval,32,"%04x %02x %02x %-10s I V%01x", offset, code[0], code[1], "ADD", lower_nibble);
+	             break;
+	        }
+		case 0x29: {
+                     snprintf(retval,32,"%04x %02x %02x %-10s V%01x", offset, code[0], code[1], "SPRITECHAR", lower_nibble);
+	             break;
+ 		}
+		case 0x33: {
+                     snprintf(retval,32,"%04x %02x %02x %-10s V%01x", offset, code[0], code[1], "MOVBCD", lower_nibble);
+	             break;
+	        }
+		case 0x55: {
+                     snprintf(retval,32,"%04x %02x %02x %-10s (I), V0-V%01x", offset, code[0], code[1], "MOVM", lower_nibble);
+	             break;
+	        }
+		case 0x65: {
+                     snprintf(retval,32,"%04x %02x %02x %-10s V0-V%01x, (I)", offset, code[0], code[1], "MOVM", lower_nibble);
+	             break;
+	        }
+		default: {
+		   snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
+		   break;
+	 	}
+	     }
+	     break;
+	}
+
+
 	default: {
              snprintf(retval,32,"%04x %02x %02x %-10s", offset, code[0], code[1], "UNKNOWN");
 	}
