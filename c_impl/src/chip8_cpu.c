@@ -262,11 +262,17 @@ void Op3(chip8_cpu_t* cpu, uint8_t* code) {
 }
 
 void Op4(chip8_cpu_t* cpu, uint8_t* code) {
-     UnimplementedInstruction(cpu,code);
+     chip8_dump_status(cpu);
+     uint8_t reg_a = LOWER_NIBBLE_U8(code[0]);
+     if(cpu->registers.V[reg_a] != code[1]) cpu->registers.PC += 2;
+     cpu->registers.PC += 2;
 }
 
 void Op5(chip8_cpu_t* cpu, uint8_t* code) {
-     UnimplementedInstruction(cpu,code);
+     uint8_t reg_a = LOWER_NIBBLE_U8(code[0]);
+     uint8_t reg_b = UPPER_NIBBLE_U8(code[1]);
+     if(cpu->registers.V[reg_a] == cpu->registers.V[reg_b]) cpu->registers.PC += 2;
+     cpu->registers.PC += 2;
 }
 
 void Op6(chip8_cpu_t* cpu, uint8_t* code) {
