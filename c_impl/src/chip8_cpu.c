@@ -19,7 +19,7 @@ chip8_cpu_t* chip8_new_cpu() {
 	retval->registers.SP = CPU8_STACK_START;
 
 	memcpy(retval->ram, chip8_rom_font, 80);
-	retval->vram = &(retval->ram[CPU8_VRAM_START]);
+	retval->vram = malloc(64*32);
 	return retval;
 }
 
@@ -239,14 +239,23 @@ void Op0(chip8_cpu_t* cpu, uint8_t* code) {
      }
 }
 
+void Op1(chip8_cpu_t* cpu, uint8_t* code) {
+     // JUMP $NNN
+     cpu->registers.PC = ((code[0]&0xf)<<8) | code[1];
+}
+
+void Op2(chip8_cpu_t* cpu, uint8_t* code) {
+     printf("UNIMPLEMENTED INSTRUCTION: %s\n", chip8_disasm(cpu, cpu->registers.PC));
+}
+
 void chip8_iter(chip8_cpu_t* cpu) {
      uint8_t* code = &(cpu->ram[cpu->registers.PC]);
      uint8_t upper_nibble = UPPER_NIBBLE_U8(code[0]);
      uint8_t lower_nibble = LOWER_NIBBLE_U8(code[0]);     
      switch(upper_nibble) {
         case 0x00: Op0(cpu, code); break;
-/*        case 0x01: Op1(cpu, code); break;
-        case 0x02: Op2(cpu, code); break;
+        case 0x01: Op1(cpu, code); break;
+/*        case 0x02: Op2(cpu, code); break;
         case 0x03: Op3(cpu, code); break;
         case 0x04: Op4(cpu, code); break;
         case 0x05: Op5(cpu, code); break;
