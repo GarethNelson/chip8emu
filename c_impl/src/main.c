@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
     chip8_load_rom(CPU, argv[1]);
     for(;;) {
         chip8_iter(CPU);
-	chip8_dump_status(CPU);
-	test_font(CPU);
+//	chip8_dump_status(CPU);
+//	test_font(CPU);
 	draw_disp(CPU->vram,screen);
 	SDL_UpdateWindowSurface(window);
     }

@@ -224,6 +224,12 @@ const char* chip8_disasm(chip8_cpu_t* cpu, uint16_t offset) {
      return retval;
 }
 
+void UnimplementedInstruction(chip8_cpu_t* cpu, uint8_t* code) {
+     chip8_dump_status(cpu);
+     printf("UNIMPLEMENTED INSTRUCTION: %s\n\n", chip8_disasm(cpu, cpu->registers.PC));
+     cpu->registers.PC += 2;
+}
+
 void Op0(chip8_cpu_t* cpu, uint8_t* code) {
      switch(code[1]) {
          case 0xE0: { // CLS
@@ -236,6 +242,7 @@ void Op0(chip8_cpu_t* cpu, uint8_t* code) {
 	      cpu->registers.SP += 2;
 	      break;
 	 }
+	 default: UnimplementedInstruction(cpu, code); break;
      }
 }
 
@@ -245,7 +252,62 @@ void Op1(chip8_cpu_t* cpu, uint8_t* code) {
 }
 
 void Op2(chip8_cpu_t* cpu, uint8_t* code) {
-     printf("UNIMPLEMENTED INSTRUCTION: %s\n", chip8_disasm(cpu, cpu->registers.PC));
+     UnimplementedInstruction(cpu,code);
+}
+
+void Op3(chip8_cpu_t* cpu, uint8_t* code) {
+     uint8_t reg = code[0] & 0xf;    
+     if(cpu->registers.V[reg] == code[1]) cpu->registers.PC += 2;
+     cpu->registers.PC += 2;  
+}
+
+void Op4(chip8_cpu_t* cpu, uint8_t* code) {
+     UnimplementedInstruction(cpu,code);
+}
+
+void Op5(chip8_cpu_t* cpu, uint8_t* code) {
+     UnimplementedInstruction(cpu,code);
+}
+
+void Op6(chip8_cpu_t* cpu, uint8_t* code) {
+     uint8_t reg = code[0] & 0xf;    
+     cpu->registers.V[reg] = code[1];
+     cpu->registers.PC+=2;   
+}
+
+void OpA(chip8_cpu_t* cpu, uint8_t* code) {
+     uint16_t* op = (uint16_t*)code;
+     cpu->registers.I = (*op) & 0x0FFF;
+     cpu->registers.PC+=2;
+}
+
+void OpD(chip8_cpu_t* cpu, uint8_t* code) {
+     uint8_t x = cpu->registers.V[UPPER_NIBBLE_U8(code[0])];
+     uint8_t y = cpu->registers.V[UPPER_NIBBLE_U8(code[1])];
+     uint8_t n = LOWER_NIBBLE_U8(code[1]);
+     uint8_t pixel;
+     int i=0;
+     int j=0;     
+     for(i=0; i<n; i++) {
+         pixel = cpu->ram[cpu->registers.I + i];
+         for(int j=0; j < 8; j++) {
+ 	     if((pixel & (0x80 >> j)) != 0) {
+                cpu->vram[(x+j*64)+y+i] = 1;						
+             }
+	 }
+     }
+     cpu->registers.PC+=2;
+}
+
+void OpF(chip8_cpu_t* cpu, uint8_t* code) {
+     switch(code[1]) { 
+	  case 0x29: {
+               cpu->registers.I = (cpu->registers.V[LOWER_NIBBLE_U8(code[0])] * 5);
+	       cpu->registers.PC += 2;
+	       break;
+	   	     }
+          default: UnimplementedInstruction(cpu,code); break;
+     }
 }
 
 void chip8_iter(chip8_cpu_t* cpu) {
@@ -255,20 +317,21 @@ void chip8_iter(chip8_cpu_t* cpu) {
      switch(upper_nibble) {
         case 0x00: Op0(cpu, code); break;
         case 0x01: Op1(cpu, code); break;
-/*        case 0x02: Op2(cpu, code); break;
+        case 0x02: Op2(cpu, code); break;
         case 0x03: Op3(cpu, code); break;
         case 0x04: Op4(cpu, code); break;
         case 0x05: Op5(cpu, code); break;
         case 0x06: Op6(cpu, code); break;
-        case 0x07: Op7(cpu, code); break;
+/*        case 0x07: Op7(cpu, code); break;
         case 0x08: Op8(cpu, code); break;
-        case 0x09: Op9(cpu, code); break;
+        case 0x09: Op9(cpu, code); break;*/
         case 0x0a: OpA(cpu, code); break;
-        case 0x0b: OpB(cpu, code); break;
-        case 0x0c: OpC(cpu, code); break;
+/*        case 0x0b: OpB(cpu, code); break;
+        case 0x0c: OpC(cpu, code); break;*/
         case 0x0d: OpD(cpu, code); break;
-        case 0x0e: OpE(cpu, code); break;
-        case 0x0f: OpF(cpu, code); break;*/
+/*        case 0x0e: OpE(cpu, code); break;*/
+        case 0x0f: OpF(cpu, code); break;
+        default: UnimplementedInstruction(cpu, code); break;
      }
 }
 
